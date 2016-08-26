@@ -24,6 +24,9 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+group = 'com.github.modmed'
 
 repositories {
     jcenter()
