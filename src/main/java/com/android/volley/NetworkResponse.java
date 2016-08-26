@@ -16,6 +16,7 @@
 
 package com.android.volley;
 
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 
 import java.util.Collections;
@@ -40,6 +41,17 @@ public class NetworkResponse {
         this.headers = headers;
         this.notModified = notModified;
         this.networkTimeMs = networkTimeMs;
+        this.apacheHeaders = null;
+    }
+
+    public NetworkResponse(int statusCode, byte[] data, Map<String, String> headers,
+                           boolean notModified, long networkTimeMs, Header[] apacheHeaders) {
+        this.statusCode = statusCode;
+        this.data = data;
+        this.headers = headers;
+        this.notModified = notModified;
+        this.networkTimeMs = networkTimeMs;
+        this.apacheHeaders = apacheHeaders;
     }
 
     public NetworkResponse(int statusCode, byte[] data, Map<String, String> headers,
@@ -69,5 +81,11 @@ public class NetworkResponse {
 
     /** Network roundtrip time in milliseconds. */
     public final long networkTimeMs;
+
+    /**
+     *  fix for getting duplicate header responses like multiple Set-Cookie
+     *   http://stackoverflow.com/questions/18998361/android-volley-duplicate-set-cookie-is-overriden
+     */
+     public final Header[] apacheHeaders;
 }
 

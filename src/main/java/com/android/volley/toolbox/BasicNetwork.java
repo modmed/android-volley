@@ -98,7 +98,9 @@ public class BasicNetwork implements Network {
                 StatusLine statusLine = httpResponse.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
 
-                responseHeaders = convertHeaders(httpResponse.getAllHeaders());
+                Header[] allHeaders = httpResponse.getAllHeaders();
+
+                responseHeaders = convertHeaders(allHeaders);
                 // Handle cache validation.
                 if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
 
@@ -106,7 +108,7 @@ public class BasicNetwork implements Network {
                     if (entry == null) {
                         return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, null,
                                 responseHeaders, true,
-                                SystemClock.elapsedRealtime() - requestStart);
+                                SystemClock.elapsedRealtime() - requestStart,  allHeaders);
                     }
 
                     // A HTTP 304 response does not have all header fields. We
@@ -116,7 +118,7 @@ public class BasicNetwork implements Network {
                     entry.responseHeaders.putAll(responseHeaders);
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, entry.data,
                             entry.responseHeaders, true,
-                            SystemClock.elapsedRealtime() - requestStart);
+                            SystemClock.elapsedRealtime() - requestStart, allHeaders);
                 }
 
                 // Some responses such as 204s do not have content.  We must check.
@@ -136,7 +138,7 @@ public class BasicNetwork implements Network {
                     throw new IOException();
                 }
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
-                        SystemClock.elapsedRealtime() - requestStart);
+                        SystemClock.elapsedRealtime() - requestStart, allHeaders);
             } catch (SocketTimeoutException e) {
                 attemptRetryOnException("socket", request, new TimeoutError());
             } catch (ConnectTimeoutException e) {
@@ -154,7 +156,7 @@ public class BasicNetwork implements Network {
                 NetworkResponse networkResponse;
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
-                            responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
+                            responseHeaders, false, SystemClock.elapsedRealtime() - requestStart, httpResponse.getAllHeaders());
                     if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
                             statusCode == HttpStatus.SC_FORBIDDEN) {
                         attemptRetryOnException("auth",
